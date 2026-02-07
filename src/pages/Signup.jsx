@@ -5,15 +5,7 @@ import api from "../lib/api";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
-const handleFields = [
-  { key: "leetcode", label: "LeetCode" },
-  { key: "gfg", label: "GFG" },
-  { key: "codeforces", label: "Codeforces" },
-  { key: "hackerrank", label: "HackerRank" },
-  { key: "codechef", label: "CodeChef" },
-  { key: "spoj", label: "SPOJ" },
-  { key: "atcoder", label: "AtCoder" }
-];
+
 
 export const Signup = ({ onAuth }) => {
   const navigate = useNavigate();
@@ -84,17 +76,7 @@ export const Signup = ({ onAuth }) => {
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              {handleFields.map((field) => (
-                <input
-                  key={field.key}
-                  className="h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-                  placeholder={`${field.label} handle`}
-                  value={form.handles[field.key] || ""}
-                  onChange={(e) => updateHandle(field.key, e.target.value)}
-                />
-              ))}
-            </div>
+
             {error && <p className="text-sm text-rose-300">{error}</p>}
 
             <Button
