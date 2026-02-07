@@ -98,11 +98,37 @@ router.post("/login", async (req, res) => {
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    const token = signToken(user);
     return res.json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles } });
   } catch (error) {
     return res.status(500).json({ message: "Login failed" });
   }
 });
+
+import passport from "../config/passport.js";
+
+// GET /api/auth/google
+// Triggers the Google OAuth flow
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// GET /api/auth/google/callback
+// Handle the callback from Google
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.CLIENT_ORIGIN}/login`,
+    session: false // We use JWT, so no session
+  }),
+  (req, res) => {
+    // Successful authentication, generate JWT
+    const user = req.user;
+    const token = signToken(user);
+
+    // Redirect to frontend with token
+    res.redirect(`${process.env.CLIENT_ORIGIN}/auth-callback?token=${token}`);
+  }
+);
 
 export default router;

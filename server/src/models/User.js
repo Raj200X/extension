@@ -18,7 +18,9 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     username: { type: String, required: true, unique: true, lowercase: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: false }, // Optional for OAuth users
+    googleId: { type: String, unique: true, sparse: true },
+    avatar: { type: String },
     handles: { type: handlesSchema, default: {} }
   },
   { timestamps: true }
