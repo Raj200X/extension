@@ -11,6 +11,7 @@ import { Signup } from "./pages/Signup";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { PublicProfile } from "./pages/PublicProfile";
+import AuthCallback from "./pages/AuthCallback";
 
 const AnimatedRoutes = ({ onAuth }) => {
   const location = useLocation();
@@ -42,6 +43,12 @@ const AnimatedRoutes = ({ onAuth }) => {
           }
         />
         <Route
+          path="/auth-callback"
+          element={
+            <AuthCallback />
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
@@ -56,6 +63,14 @@ const AnimatedRoutes = ({ onAuth }) => {
           element={
             <PageTransition>
               <PublicProfile />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/demo"
+          element={
+            <PageTransition>
+              <Dashboard isDemo={true} />
             </PageTransition>
           }
         />

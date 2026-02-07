@@ -11,7 +11,7 @@ const platformOrder = ["LeetCode", "GFG", "Codeforces", "HackerRank", "CodeChef"
 
 const solveToKey = (solve) => `${solve.canonicalQuestionId}_${solve.platform}`;
 
-export const Dashboard = () => {
+export const Dashboard = ({ isDemo = false }) => {
   const [questions, setQuestions] = useState([]);
   const [solves, setSolves] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,35 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const load = async () => {
+      if (isDemo) {
+        try {
+          // Fetch all real questions public endpoint
+          const { data } = await api.get("/questions");
+          setQuestions(data.questions);
+
+          // Generate some fake solves for the demo experience
+          if (data.questions.length > 0) {
+            const fakeSolves = data.questions.slice(0, 3).flatMap(q => {
+              // solving 1st platform for first 3 questions
+              const p = q.platforms[0];
+              return p ? [{
+                canonicalQuestionId: q._id,
+                platform: p.platform,
+                verified: true
+              }] : [];
+            });
+            setSolves(fakeSolves);
+          } else {
+            setSolves([]);
+          }
+        } catch (err) {
+          setError("Failed to load demo data. Ensure backend is running.");
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         const { data } = await api.get("/questions/with-solves");
         setQuestions(data.questions);
@@ -30,7 +59,7 @@ export const Dashboard = () => {
       }
     };
     load();
-  }, []);
+  }, [isDemo]);
 
   const solveMap = useMemo(() => {
     const map = new Map();
