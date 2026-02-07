@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "CodeCanon Solve Verifier",
+  "version": "1.0.0",
+  "description": "Detects accepted solves and verifies them in CodeCanon.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/problems/*"
+      ],
+      "js": [
+        "leetcode.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://practice.geeksforgeeks.org/problems/*",
+        "https://www.geeksforgeeks.org/problems/*"
+      ],
+      "js": [
+        "gfg.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.hackerrank.com/challenges/*"
+      ],
+      "js": [
+        "hackerrank.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "CodeCanon",
+    "default_popup": "popup.html"
+  }
+}
