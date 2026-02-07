@@ -8,7 +8,7 @@ const AuthCallback = () => {
     useEffect(() => {
         const token = searchParams.get("token");
         if (token) {
-            localStorage.setItem("token", token);
+            localStorage.setItem("cc_token", token);
             // Optional: You could fetch user details here immediately if needed, 
             // but usually the Dashboard or a protected route wrapper does that.
             navigate("/dashboard");

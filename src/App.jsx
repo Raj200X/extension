@@ -83,10 +83,26 @@ const App = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("cc_token");
-    if (!token) {
-      setUser(null);
-    }
+    const loadUser = async () => {
+      const token = localStorage.getItem("cc_token");
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      try {
+        // We need to import api here, but we can't easily validly import it inside useEffect
+        // So we'll assume api is available or imported.
+        // Actually, let's just dynamic import or expect it to work if we import it at top.
+        // Better: Import api at the top.
+        const { data } = await import("./lib/api").then(m => m.default.get("/users/me"));
+        setUser(data.user);
+      } catch (err) {
+        console.error("Failed to restore session", err);
+        localStorage.removeItem("cc_token");
+        setUser(null);
+      }
+    };
+    loadUser();
   }, []);
 
   const handleLogout = () => {

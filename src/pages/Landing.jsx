@@ -7,6 +7,16 @@ import { PlatformLogo } from "../components/PlatformLogo";
 
 const logos = ["LeetCode", "GFG", "Codeforces", "HackerRank", "CodeChef", "SPOJ", "AtCoder"];
 
+const platformUrls = {
+  LeetCode: "https://leetcode.com",
+  GFG: "https://www.geeksforgeeks.org",
+  Codeforces: "https://codeforces.com",
+  HackerRank: "https://www.hackerrank.com",
+  CodeChef: "https://www.codechef.com",
+  SPOJ: "https://www.spoj.com",
+  AtCoder: "https://atcoder.jp"
+};
+
 export const Landing = () => (
   <div className="mx-auto max-w-6xl px-6 pb-20 pt-16">
     <motion.div
@@ -38,9 +48,17 @@ export const Landing = () => (
         </div>
         <div className="mt-12 opacity-70 hover:opacity-100 transition-opacity duration-500">
           <p className="text-sm text-slate-500 mb-4 uppercase tracking-widest font-semibold">Trusted integrations with</p>
-          <div className="flex flex-wrap gap-6 grayscale hover:grayscale-0 transition-all duration-500">
+          <div className="flex flex-wrap gap-6 transition-all duration-500">
             {logos.map((logo) => (
-              <PlatformLogo key={logo} platform={logo} className="h-7" />
+              <a
+                key={logo}
+                href={platformUrls[logo]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-transform hover:scale-110"
+              >
+                <PlatformLogo platform={logo} className="h-7" />
+              </a>
             ))}
           </div>
         </div>

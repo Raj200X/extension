@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post("/signup", async (req, res) => {
   try {
-    const { name, username, email, password, handles } = req.body;
+    const { name, username, email, password } = req.body;
     if (!name || !username || !email || !password) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -18,11 +18,11 @@ router.post("/signup", async (req, res) => {
       if (existing) {
         return res.status(409).json({ message: "Email or username already in use" });
       }
-      const user = await mockStore.createUser({ name, username, email, password, handles });
+      const user = await mockStore.createUser({ name, username, email, password });
       const token = signToken({ _id: user.id, email: user.email, username: user.username });
       return res.status(201).json({
         token,
-        user: { id: user.id, name: user.name, username: user.username, email: user.email, handles: user.handles }
+        user: { id: user.id, name: user.name, username: user.username, email: user.email }
       });
     }
 
@@ -36,10 +36,9 @@ router.post("/signup", async (req, res) => {
       username: username.toLowerCase(),
       email: email.toLowerCase(),
       passwordHash,
-      handles: handles || {}
     });
     const token = signToken(user);
-    return res.status(201).json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles } });
+    return res.status(201).json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles || {} } });
   } catch (error) {
     return res.status(500).json({ message: "Signup failed" });
   }
@@ -92,14 +91,26 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log("Login failed: User not found", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
+
+    // Check if user has a password (might be OAuth-only)
+    if (!user.passwordHash) {
+      console.log("Login failed: User has no password (maybe OAuth user?)", email);
+      return res.status(401).json({ message: "Invalid credentials. Try logging in with Google." });
+    }
+
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) {
+      console.log("Login failed: Password mismatch", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    console.log("Login successful:", email);
+    const token = signToken(user);
     return res.json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles } });
   } catch (error) {
+    console.error("Login Error:", error);
     return res.status(500).json({ message: "Login failed" });
   }
 });

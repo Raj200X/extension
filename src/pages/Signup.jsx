@@ -14,14 +14,12 @@ export const Signup = ({ onAuth }) => {
     username: "",
     email: "",
     password: "",
-    handles: {}
+
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const updateHandle = (key, value) => {
-    setForm((prev) => ({ ...prev, handles: { ...prev.handles, [key]: value } }));
-  };
+
 
   const submit = async (event) => {
     event.preventDefault();
@@ -44,7 +42,7 @@ export const Signup = ({ onAuth }) => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="glass-hover gradient-border">
           <h2 className="text-2xl font-semibold text-white">Create your DSA Compass profile</h2>
-          <p className="mt-2 text-sm text-slate-300">Add your public handles to connect verified solves.</p>
+          <p className="mt-2 text-sm text-slate-300">Join our community of developers.</p>
           <form onSubmit={submit} className="mt-8 grid gap-4">
             <div className="grid gap-4 md:grid-cols-2">
               <input
@@ -83,7 +81,7 @@ export const Signup = ({ onAuth }) => {
               type="button"
               variant="outline"
               className="w-full border-white/20 hover:bg-white/10"
-              onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}
+              onClick={() => window.location.href = "/api/auth/google"}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path

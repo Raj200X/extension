@@ -27,9 +27,12 @@ router.get("/with-solves", requireAuth, async (req, res) => {
       return res.json({ questions, solves });
     }
     const questions = await CanonicalQuestion.find().sort({ canonicalTitle: 1 });
+    console.log(`User ${req.user.id} fetching dashboard: Found ${questions.length} questions.`);
     const solves = await UserSolve.find({ userId: req.user.id });
+    console.log(`User ${req.user.id} has ${solves.length} solves.`);
     return res.json({ questions, solves });
   } catch (error) {
+    console.error("Dashboard Load Error:", error);
     return res.status(500).json({ message: "Failed to load dashboard" });
   }
 });

@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Detects accepted solves and verifies them in CodeCanon.",
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "host_permissions": [
     "http://localhost:5000/*"
@@ -42,8 +43,18 @@
   "background": {
     "service_worker": "background.js"
   },
+  "icons": {
+    "16": "assets/logo.png",
+    "48": "assets/logo.png",
+    "128": "assets/logo.png"
+  },
   "action": {
     "default_title": "CodeCanon",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/logo.png",
+      "48": "assets/logo.png",
+      "128": "assets/logo.png"
+    }
   }
 }
