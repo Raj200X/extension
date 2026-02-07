@@ -51,7 +51,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Missing credentials" });
     }
 
-    if (email === "admin@example.com" && password === "admin123") {
+    // Admin check
+    if ((email === "admin@example.com" || email === "admin") && password === "admin123") {
       const adminUser = {
         _id: "admin-id",
         name: "Admin User",
@@ -71,10 +72,11 @@ router.post("/login", async (req, res) => {
         }
       });
     }
+
     if (useMockStore()) {
       const user =
         mockStore.findUserByEmail(email) ||
-        mockStore.findUserByUsername(email);
+        mockStore.findUserByUsername(email); // Here 'email' variable can be username too
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -85,11 +87,18 @@ router.post("/login", async (req, res) => {
       const token = signToken({ _id: user.id, email: user.email, username: user.username });
       return res.json({
         token,
-        user: { id: user.id, name: user.name, username: user.username, email: user.email, handles: user.handles }
+        user: { id: user.id, name: user.name, username: user.username, email: user.email, handles: user.handles || {} }
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Real DB check: find by email OR username
+    const user = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: email.toLowerCase() }
+      ]
+    });
+
     if (!user) {
       console.log("Login failed: User not found", email);
       return res.status(401).json({ message: "Invalid credentials" });
@@ -106,12 +115,33 @@ router.post("/login", async (req, res) => {
       console.log("Login failed: Password mismatch", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    console.log("Login successful:", email);
+    console.log("Login successful:", user.username);
     const token = signToken(user);
-    return res.json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles } });
+    return res.json({ token, user: { id: user._id, name: user.name, username: user.username, email: user.email, handles: user.handles || {} } });
   } catch (error) {
     console.error("Login Error:", error);
     return res.status(500).json({ message: "Login failed" });
+  }
+});
+
+// GET /api/auth/check-username?username=...
+router.get("/check-username", async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ message: "Username is required" });
+    }
+
+    if (useMockStore()) {
+      const existing = mockStore.findUserByUsername(username);
+      return res.json({ available: !existing });
+    }
+
+    const existing = await User.findOne({ username: username.toLowerCase() });
+    return res.json({ available: !existing });
+  } catch (error) {
+    console.error("Check username error:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 

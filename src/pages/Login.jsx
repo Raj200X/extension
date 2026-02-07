@@ -36,7 +36,7 @@ export const Login = ({ onAuth }) => {
           <form onSubmit={submit} className="mt-8 grid gap-4">
             <input
               className="h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-              placeholder="Email"
+              placeholder="Email or Username"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -82,7 +82,7 @@ export const Login = ({ onAuth }) => {
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#0b101b] px-2 text-slate-400">Or continue with email</span>
+                <span className="bg-[#0b101b] px-2 text-slate-400">Or continue with email/username</span>
               </div>
             </div>
 

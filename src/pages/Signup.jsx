@@ -18,11 +18,45 @@ export const Signup = ({ onAuth }) => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(null); // null = not checked, true = available, false = taken
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
 
+
+  const checkUsername = async (username) => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+    setCheckingUsername(true);
+    try {
+      const { data } = await api.get(`/auth/check-username?username=${username}`);
+      setUsernameAvailable(data.available);
+    } catch (err) {
+      console.error("Failed to check username", err);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleUsernameChange = (e) => {
+    const val = e.target.value;
+    setForm({ ...form, username: val });
+    // Debounce or just check on every change for now (simple)
+    // For better UX, use a debounce hook, but direct call is fine for low traffic
+    if (val.length >= 3) {
+      checkUsername(val);
+    } else {
+      setUsernameAvailable(null);
+    }
+  };
 
   const submit = async (event) => {
     event.preventDefault();
+    if (usernameAvailable === false) {
+      setError("Username is already taken");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -51,12 +85,30 @@ export const Signup = ({ onAuth }) => {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
-              <input
-                className="h-11 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-                placeholder="Username"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-              />
+              <div className="relative">
+                <input
+                  className={`h-11 w-full rounded-xl border bg-white/5 px-4 text-sm text-white ${usernameAvailable === false
+                      ? "border-rose-500 focus:border-rose-500"
+                      : usernameAvailable === true
+                        ? "border-emerald-500 focus:border-emerald-500"
+                        : "border-white/10"
+                    }`}
+                  placeholder="Username"
+                  value={form.username}
+                  onChange={handleUsernameChange}
+                />
+                {checkingUsername && (
+                  <div className="absolute right-3 top-3">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white"></div>
+                  </div>
+                )}
+                {usernameAvailable === false && (
+                  <p className="mt-1 text-xs text-rose-400">Username taken</p>
+                )}
+                {usernameAvailable === true && (
+                  <p className="mt-1 text-xs text-emerald-400">Username available</p>
+                )}
+              </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <input
@@ -112,7 +164,7 @@ export const Signup = ({ onAuth }) => {
                 <span className="bg-[#0b101b] px-2 text-slate-400">Or sign up with email</span>
               </div>
             </div>
-            <Button type="submit" size="lg" disabled={loading}>
+            <Button type="submit" size="lg" disabled={loading || usernameAvailable === false}>
               {loading ? "Creating..." : "Create account"}
             </Button>
             <p className="text-sm text-slate-400">
