@@ -1,3 +1,4 @@
+import "express-async-errors";
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -27,6 +28,11 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/solve", solveRoutes);
 app.use("/api/users", userRoutes);
 
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  res.status(500).json({ message: "Internal Server Error" });
+});
+
 const start = async () => {
   try {
     if (!useMockStore()) {
@@ -44,3 +50,14 @@ const start = async () => {
 };
 
 start();
+
+// Global Error Handling
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION! 💥 Shutting down...", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION! 💥 Shutting down...", err);
+  process.exit(1);
+});

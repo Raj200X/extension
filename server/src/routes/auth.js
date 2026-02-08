@@ -26,9 +26,14 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    const existing = await User.findOne({ $or: [{ email }, { username }] });
-    if (existing) {
-      return res.status(409).json({ message: "Email or username already in use" });
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
+
+    const existingUsername = await User.findOne({ username: username.toLowerCase() });
+    if (existingUsername) {
+      return res.status(409).json({ message: "Username already taken" });
     }
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await User.create({

@@ -63,8 +63,9 @@ const configurePassport = () => {
                 }
 
                 // 2. MONGODB HANDLING
+                // Check if user exists by email OR googleId
                 let user = await User.findOne({
-                    $or: [{ googleId }, { email }]
+                    $or: [{ googleId }, { email: email.toLowerCase() }]
                 });
 
                 if (user) {
@@ -77,13 +78,33 @@ const configurePassport = () => {
                     return done(null, user);
                 }
 
-                // Create new user
-                const username = email.split("@")[0] + Math.floor(Math.random() * 1000); // Strategy to ensure uniqueness?
+                // Create new user with robust username generation
+                let username = email.split("@")[0].toLowerCase();
+                let isUnique = false;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 5) {
+                    // Check if username exists
+                    const existing = await User.findOne({ username });
+                    if (!existing) {
+                        isUnique = true;
+                    } else {
+                        // Append random number
+                        const randomSuffix = Math.floor(Math.random() * 10000);
+                        username = `${email.split("@")[0].toLowerCase()}${randomSuffix}`;
+                        attempts++;
+                    }
+                }
+
+                if (!isUnique) {
+                    // Fallback to timestamp if random fail
+                    username = `${email.split("@")[0].toLowerCase()}${Date.now()}`;
+                }
 
                 user = await User.create({
                     name,
                     username,
-                    email,
+                    email: email.toLowerCase(),
                     googleId,
                     avatar,
                     passwordHash: "", // flag or empty for OAuth

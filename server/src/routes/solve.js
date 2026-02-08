@@ -67,25 +67,37 @@ const findCanonicalMatch = async ({ platform, questionTitle, problemSlug }) => {
 router.post("/", async (req, res) => {
   try {
     const { platform, questionTitle, problemSlug, handle } = req.body;
+    console.log("DEBUG: POST /api/solve received:", { platform, questionTitle, problemSlug, handle });
+
     if (!platform || !questionTitle) {
+      console.log("DEBUG: Missing platform or questionTitle");
       return res.status(400).json({ message: "Missing platform or questionTitle" });
     }
 
     let userId = null;
     const authHeader = req.headers.authorization || "";
     if (authHeader.startsWith("Bearer ")) {
-      return requireAuth(req, res, async () => {
-        userId = req.user.id;
-        return await handleSolve(req, res, { platform, questionTitle, problemSlug, userId });
+      return await new Promise((resolve, reject) => {
+        requireAuth(req, res, async () => {
+          try {
+            userId = req.user.id;
+            await handleSolve(req, res, { platform, questionTitle, problemSlug, userId });
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
       });
     }
 
     if (!handle) {
+      console.log("DEBUG: Handle is missing in request");
       return res.status(401).json({ message: "Missing handle to map solve to a user" });
     }
     const user = await findUserByHandle(platform, handle);
     if (!user) {
-      return res.status(404).json({ message: "No user linked to that handle" });
+      console.log(`DEBUG: User not found for handle: ${handle} on platform: ${platform}`);
+      return res.status(404).json({ message: `No CodeCanon account linked to LeetCode handle '${handle}'` });
     }
     userId = user._id || user.id;
     return await handleSolve(req, res, { platform, questionTitle, problemSlug, userId });
